@@ -1,0 +1,8 @@
+[package]
+name = "routez"
+version = "0.0.1"
+authors = ["Mihai Galos <mihaigalos@gmail.com>"]
+description = "⏩ A zero-dep port forwarder."
+edition = "2021"
+
+[dependencies]
