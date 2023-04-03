@@ -5,4 +5,7 @@ authors = ["Mihai Galos <mihaigalos@gmail.com>"]
 description = "⏩ A zero-dep port forwarder."
 edition = "2021"
 
+repository = "https://github.com/mihaigalos/routez"
+license = "MIT"
+
 [dependencies]
