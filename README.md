@@ -13,6 +13,6 @@ Useful when creating an IPVLAN (L3) which has the Class-B IPs and when one wants
 ## Example usage
 
 ```bash
-cargo run 127.0.0.1:1234 127.0.0.1:4321
+routez 127.0.0.1:1234 127.0.0.1:4321
 ```
 
