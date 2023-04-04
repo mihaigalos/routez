@@ -25,6 +25,6 @@ fn main() {
         route_one_connection(&args[1], &args[2]);
     }
     else {
-        return println!("Example usage: cargo run 127.0.0.1:1234 127.0.0.1:4321");
+        return println!("Example usage: {} 127.0.0.1:1234 127.0.0.1:4321", env!("CARGO_PKG_NAME"));
     }
 }
