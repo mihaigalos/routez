@@ -6,7 +6,7 @@ A zero-dep port forwarder.
 
 ## Why?
 
-Originally implemented to reroute traffic from Class-C IPs (`192.168.x.x`) to Docker Class-B ones (`172.18.x.x`).
+Originally implemented to reroute traffic from Docker Class-B ones (`172.18.x.x`) to Class-C IPs (`192.168.x.x`).
 
 Useful when creating an IPVLAN (L3) which has the Class-B IPs and when one wants to reach them from Class-C ones.
 
