@@ -1,9 +1,21 @@
 [package]
 name = "routez"
-version = "0.0.3"
+version = "0.1.0"
 authors = ["Mihai Galos <mihaigalos@gmail.com>"]
 description = "⏩ A zero-dep port forwarder."
 edition = "2021"
+
+categories = [
+    "HTTP client",
+    "command-line-utilities",
+    "network-programming"
+]
+keywords = [
+    "cli",
+    "forward",
+    "port",
+    "proxy"
+]
 
 repository = "https://github.com/mihaigalos/routez"
 license = "MIT"
