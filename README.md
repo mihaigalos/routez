@@ -18,14 +18,14 @@ routez 127.0.0.1:1234 127.0.0.1:4321
 
 ## Pipeview
 
-To color output logs, have a look at [pipeview](https://github.com/mihaigalos/pipeview).
+To output color logs, have a look at [pipeview](https://github.com/mihaigalos/pipeview).
 
 Either run:
 ```bash
 routez 127.0.0.1:1234 127.0.0.1:4321 | pipeview '(.*?) (.*?) (.*?) (.*?) -> (.*)' 'blue cyan white green bred'
 ```
 
-Or create a `pipeview.toml` file in the directory you are calling `routez` from and invoke:
+Or create a `pipeview.toml` file in the directory you are calling `routez` from (see example in this repo) and invoke:
 
 ```bash
 routez 127.0.0.1:1234 127.0.0.1:4321 | pipeview
