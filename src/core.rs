@@ -12,7 +12,7 @@ pub fn run(args: Vec<String>) {
 fn route_one_connection(from: &str, to: &str) {
     let listener = TcpListener::bind(from).expect("Cannot bind from address");
 
-    println!("Routing {from} -> {to}");
+    println!("Routing {from} ⏩ {to}");
 
     for incoming_stream in listener.incoming() {
         let from_stream = if let Ok(val) = incoming_stream {
