@@ -1,5 +1,7 @@
 # routez
 
+[![crates.io](https://img.shields.io/crates/d/routez.svg)](https://crates.io/crates/routez)
+
 A zero-dep TCP port forwarder.
 
 ![demo](docs/demo.png)
