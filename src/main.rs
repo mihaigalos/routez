@@ -2,7 +2,7 @@ use std::env;
 use std::thread;
 
 use routez::config::read_config;
-use routez::core::*;
+use routez::tcp::*;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
