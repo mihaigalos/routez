@@ -1,6 +1,6 @@
 # routez
 
-A zero-dep port forwarder.
+A zero-dep TCP port forwarder.
 
 ![demo](docs/demo.png)
 
