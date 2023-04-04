@@ -27,7 +27,7 @@ fn route_one_connection(from: &str, to: &str) {
 
         let timestamp = get_timestamp();
         match connection_thread {
-            Ok(_) => { println!("{timestamp} CONNECTED {from} -> {to}"); }
+            Ok(_) => { println!("⚡ {timestamp} CONNECTED {from} -> {to}"); }
             Err(err) => { println!("Destination error: {err}"); }
         }
     }
@@ -59,6 +59,6 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     for t in connections {
         t.join().unwrap();
         let timestamp = get_timestamp();
-        println!("{timestamp} CLOSED {from} -> {to}");
+        println!("🔌 {timestamp} DISCONNECTED {from} -> {to}");
     }
 }
