@@ -15,6 +15,19 @@ Useful when creating an IPVLAN (L3) which has the Class-B IPs and when one wants
 ```bash
 routez 127.0.0.1:1234 127.0.0.1:4321
 ```
+## Example usage - config file
+
+Create a config file with `source:port destination:port` (exactly 1 space, no empty newlines at the end):
+
+```
+127.0.0.1:1234 192.168.0.33:22
+127.0.0.1:4321 192.168.0.33:22
+```
+
+Now run with:
+```bash
+routez routez.config
+```
 
 ## Pipeview
 
