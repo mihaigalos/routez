@@ -1,0 +1,3 @@
+[default]
+regex="(.*?) (.*?) (.*?) (.*?) -> (.*)"
+colors="blue cyan white green bred"
