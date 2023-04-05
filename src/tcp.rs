@@ -5,14 +5,11 @@ use std::thread;
 
 use std::time::SystemTime;
 
-pub fn run(args: Vec<String>) {
-    route_one_connection(&args[1], &args[2]);
-}
+pub fn route(from: &str, to: &str) -> std::io::Result<()> {
 
-pub fn route_one_connection(from: &str, to: &str) {
     let listener = TcpListener::bind(from).expect("Cannot bind from address");
 
-    println!("Routing {from} ⏩ {to}");
+    println!("Routing TCP {from} ⏩ {to}");
 
     for incoming_stream in listener.incoming() {
         let from_stream = if let Ok(val) = incoming_stream {
@@ -31,6 +28,8 @@ pub fn route_one_connection(from: &str, to: &str) {
             Err(err) => { println!("Destination error: {err}"); }
         }
     }
+
+    Ok(())
 }
 
 fn get_timestamp() -> String {
