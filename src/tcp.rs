@@ -6,6 +6,7 @@ use std::thread;
 use std::time::SystemTime;
 
 pub fn route(from: &str, to: &str) {
+
     let listener = TcpListener::bind(from).expect("Cannot bind from address");
 
     println!("Routing {from} ⏩ {to}");

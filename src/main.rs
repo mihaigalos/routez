@@ -19,12 +19,16 @@ fn main() {
             }
         }
 
-    } else if args.len() == 3 {
-        let (from, to) = (args[1].clone(), args[2].clone());
-        handles.push(thread::spawn(move || udp::route(&from, &to).unwrap()));
+    } else if args.len() == 4 {
+        let (from, to, protocol) = (args[1].clone(), args[2].clone(), args[3].to_uppercase());
+        match protocol.as_str() {
+            "UDP" => handles.push(thread::spawn(move || udp::route(&from, &to).unwrap())),
+            "TCP" => handles.push(thread::spawn(move || tcp::route(&from, &to))),
+            _ => panic!("Please provide a 3rd parameter: {{tcp, udp}}")
+        }
     }
     else {
-        return println!("Example usage: {} 127.0.0.1:1234 127.0.0.1:4321", env!("CARGO_PKG_NAME"));
+        return println!("Example usage: {} 127.0.0.1:1234 127.0.0.1:4321 [TCP or UDP]", env!("CARGO_PKG_NAME"));
     }
 
     for handle in handles {
