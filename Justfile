@@ -1,8 +1,7 @@
 @default:
     just --list --unsorted
 
-test_tcp:
-    #!/bin/bash
+@test_tcp:
     cargo build --release
     nc -l 8090 >/tmp/routez_tcp.log &
     cargo run >/dev/null 2>&1 --release 127.0.0.1:7090 127.0.0.1:8090 TCP &
@@ -12,8 +11,7 @@ test_tcp:
 
     [ $(grep -o 'HelloWorld' /tmp/routez_tcp.log) ] && just ok || just err "ERROR"
 
-test_udp:
-    #!/bin/bash
+@test_udp:
     cargo build --release
     nc -ul 8090 >/tmp/routez_udp.log &
     cargo run >/dev/null 2>&1 --release 127.0.0.1:7090 127.0.0.1:8090 UDP &
