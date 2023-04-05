@@ -20,10 +20,8 @@ fn main() {
         }
 
     } else if args.len() == 3 {
-        let (from, to) = (&args[1], &args[2]);
-        let from_clone : String = from.to_string();
-        let to_clone : String = to.to_string();
-        handles.push(thread::spawn(move || udp::route(&from_clone, &to_clone).unwrap()));
+        let (from, to) = (args[1].clone(), args[2].clone());
+        handles.push(thread::spawn(move || udp::route(&from, &to).unwrap()));
     }
     else {
         return println!("Example usage: {} 127.0.0.1:1234 127.0.0.1:4321", env!("CARGO_PKG_NAME"));
