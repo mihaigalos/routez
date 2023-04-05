@@ -10,9 +10,7 @@ test_tcp:
     echo -n "HelloWorld" | nc -4 127.0.0.1 7090 &
     pkill nc
 
-    err() { echo -e "\e[1;31m${@}\e[0m" >&2; exit 1; }
-    ok() { echo -e "\e[1;32mOK\e[0m"; }
-    [ $(grep -o 'HelloWorld' /tmp/routez_tcp.log) ] && ok || err "ERROR"
+    [ $(grep -o 'HelloWorld' /tmp/routez_tcp.log) ] && just ok || just err "ERROR"
 
 test_udp:
     #!/bin/bash
@@ -23,7 +21,10 @@ test_udp:
     echo -n "HelloWorld" | nc -4u 127.0.0.1 7090 &
     pkill nc
 
-    err() { echo -e "\e[1;31m${@}\e[0m" >&2; exit 1; }
-    ok() { echo -e "\e[1;32mOK\e[0m"; }
-    [ $(grep -o 'HelloWorld' /tmp/routez_udp.log) ] && ok || err "ERROR"
+    [ $(grep -o 'HelloWorld' /tmp/routez_udp.log) ] && just ok || just err "ERROR"
 
+@err +args="ERROR":
+    echo "\e[1;31m${@}\e[0m" >&2; exit 1;
+
+@ok:
+    echo "\e[1;32mOK\e[0m";
