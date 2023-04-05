@@ -5,7 +5,7 @@ use std::thread;
 
 use std::time::SystemTime;
 
-pub fn route(from: &str, to: &str) {
+pub fn route(from: &str, to: &str) -> std::io::Result<()> {
 
     let listener = TcpListener::bind(from).expect("Cannot bind from address");
 
@@ -28,6 +28,8 @@ pub fn route(from: &str, to: &str) {
             Err(err) => { println!("Destination error: {err}"); }
         }
     }
+
+    Ok(())
 }
 
 fn get_timestamp() -> String {

@@ -5,7 +5,7 @@ use routez::config::read_config;
 use routez::tcp;
 use routez::udp;
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     let mut handles: Vec<_> = Vec::new();
 
@@ -22,16 +22,18 @@ fn main() {
     } else if args.len() == 4 {
         let (from, to, protocol) = (args[1].clone(), args[2].clone(), args[3].to_uppercase());
         match protocol.as_str() {
-            "UDP" => handles.push(thread::spawn(move || udp::route(&from, &to).unwrap())),
+            "UDP" => handles.push(thread::spawn(move || udp::route(&from, &to))),
             "TCP" => handles.push(thread::spawn(move || tcp::route(&from, &to))),
             _ => panic!("Please provide a 3rd parameter: {{tcp, udp}}")
         }
     }
     else {
-        return println!("Example usage: {} 127.0.0.1:1234 127.0.0.1:4321 [TCP or UDP]", env!("CARGO_PKG_NAME"));
+        panic!("{}",format!("Example usage: {} 127.0.0.1:1234 127.0.0.1:4321 [TCP or UDP]", env!("CARGO_PKG_NAME")));
     }
 
     for handle in handles {
-        handle.join().unwrap();
+        let _ = handle.join().unwrap();
     }
+
+    Ok(())
 }
