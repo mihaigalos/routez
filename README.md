@@ -15,7 +15,7 @@ Useful when creating an IPVLAN (L3) which has the Class-B IPs and when one wants
 ## Example usage
 
 ```bash
-routez 127.0.0.1:1234 127.0.0.1:4321
+routez 127.0.0.1:1234 127.0.0.1:4321 TCP
 ```
 ## Example usage - config file
 
