@@ -5,11 +5,7 @@ use std::thread;
 
 use std::time::SystemTime;
 
-pub fn run(args: Vec<String>) {
-    route_one_connection(&args[1], &args[2]);
-}
-
-pub fn route_one_connection(from: &str, to: &str) {
+pub fn route(from: &str, to: &str) {
     let listener = TcpListener::bind(from).expect("Cannot bind from address");
 
     println!("Routing {from} ⏩ {to}");

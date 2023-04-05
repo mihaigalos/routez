@@ -2,7 +2,8 @@ use std::env;
 use std::thread;
 
 use routez::config::read_config;
-use routez::tcp::*;
+use routez::tcp;
+use routez::udp;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -14,7 +15,7 @@ fn main() {
             if let Some((from, to)) = line.expect("Invalid config").split_once(' '){
                 let from_clone : String = from.to_string();
                 let to_clone : String = to.to_string();
-                handles.push(thread::spawn(move || route_one_connection(&from_clone, &to_clone)));
+                handles.push(thread::spawn(move || tcp::route(&from_clone, &to_clone)));
             }
         }
 
@@ -22,7 +23,7 @@ fn main() {
             handle.join().unwrap();
         }
     } else if args.len() == 3 {
-        route_one_connection(&args[1], &args[2]);
+        udp::route(&args[1], &args[2]).unwrap();
     }
     else {
         return println!("Example usage: {} 127.0.0.1:1234 127.0.0.1:4321", env!("CARGO_PKG_NAME"));
