@@ -12,11 +12,17 @@ fn main() -> std::io::Result<()> {
     if args.len() == 2 {
         let lines = read_config(&args[1]);
         for line in lines {
-            if let Some((from, to)) = line.expect("Invalid config").split_once(' '){
-                let from_clone : String = from.to_string();
-                let to_clone : String = to.to_string();
-                handles.push(thread::spawn(move || tcp::route(&from_clone, &to_clone)));
+            let myline = line.expect("Invalid config");
+            let split = myline.splitn(3,' ').collect::<Vec<_>>();
+            let (from, to, protocol) = (split[0].to_string(), split[1].to_string(), split[2].to_string());
+
+            let (from_clone, to_clone) = (from.clone(), to.clone());
+            match protocol.as_str() {
+                "UDP" => handles.push(thread::spawn(move || udp::route(&from, &to))),
+                "TCP" => handles.push(thread::spawn(move || tcp::route(&from, &to))),
+                _ => panic!("Please provide a 3rd parameter: {{tcp, udp}}")
             }
+            handles.push(thread::spawn(move || tcp::route(&from_clone, &to_clone)));
         }
 
     } else if args.len() == 4 {
