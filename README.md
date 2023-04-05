@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/d/routez.svg)](https://crates.io/crates/routez)
 
-A zero-dep TCP port forwarder.
+A zero-dep port forwarder. Routez supports both TCP and UDP.
 
 ![demo](docs/demo.png)
 
@@ -22,8 +22,8 @@ routez 127.0.0.1:1234 127.0.0.1:4321
 Create a config file with `source:port destination:port` (exactly 1 space):
 
 ```
-127.0.0.1:1234 192.168.0.33:22
-127.0.0.1:4321 192.168.0.33:22
+127.0.0.1:1234 192.168.0.33:22 TCP
+127.0.0.1:4321 127.0.0.1:7890 UDP
 ```
 
 Now run with:
@@ -37,11 +37,11 @@ To output color logs, have a look at [pipeview](https://github.com/mihaigalos/pi
 
 Either run:
 ```bash
-routez 127.0.0.1:1234 127.0.0.1:4321 | pipeview '(.*?) (.*?) (.*?) (.*?) -> (.*)' 'blue cyan white green bred'
+routez 127.0.0.1:1234 127.0.0.1:4321 TCP | pipeview '(.*?) (.*?) (.*?) (.*?) -> (.*)' 'blue cyan white green bred'
 ```
 
 Or create a `pipeview.toml` file in the directory you are calling `routez` from (see example in this repo) and invoke:
 
 ```bash
-routez 127.0.0.1:1234 127.0.0.1:4321 | pipeview
+routez 127.0.0.1:1234 127.0.0.1:4321 UDP | pipeview
 ```
