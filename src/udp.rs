@@ -1,13 +1,17 @@
 use std::net::UdpSocket;
+use std::sync::Arc;
+use std::thread;
 
 pub fn route(from: &str, to: &str) -> std::io::Result<()> {
     println!("Routing UDP {from} ⏩ {to}");
     let socket = UdpSocket::bind(from)?;
 
-    let mut buf = [0; 1*1024*1024];
-
     loop {
+        let mut buf = [0; 1024];
+        let socket = Arc::new(socket.try_clone().expect("Failed to clone socket"));
         let received_count = socket.recv(&mut buf)?;
-        socket.send_to(&buf[..received_count], to)?;
+
+        let to = to.to_string();
+        thread::spawn(move || socket.send_to(&buf[..received_count], to));
     }
 }
