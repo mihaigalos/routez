@@ -55,6 +55,12 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
         thread::spawn(move || io::copy(&mut to_tx, &mut from_rx).unwrap()),
     ];
 
+
+    let (from_clone, to_clone) = (from.clone(), to.clone());
+    std::panic::set_hook(Box::new( move |_| {
+        let timestamp = get_timestamp();
+        println!("💔 {timestamp} BROKEN_PIPE {from_clone} -> {to_clone}");
+    }));
     for t in connections {
         t.join().unwrap();
         let timestamp = get_timestamp();
