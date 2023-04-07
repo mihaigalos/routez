@@ -56,11 +56,10 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
      let (mut from_tx, mut from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
      let (mut to_tx, mut to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
 
-    let (stats_tx, _) = mpsc::channel();
-    let (write_tx, write_rx) = mpsc::channel();
+    let (stats_tx, _stats_rx) = mpsc::channel();
     let connections = vec![
-        thread::spawn(move || read_loop(from_tx, to_rx, stats_tx, write_tx).unwrap()),
-        thread::spawn(move || write_loop(to_tx, from_rx, write_rx).unwrap()),
+        thread::spawn(move || read_loop(from_tx, to_rx, stats_tx).unwrap()),
+        thread::spawn(move || write_loop(to_tx, from_rx).unwrap()),
     ];
 
 
@@ -78,16 +77,45 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
 
 pub fn write_loop(
     mut to_stream: TcpStream,
-    mut _from_stream: TcpStream,
-    write_rx: Receiver<Vec<u8>>
+    mut from_stream: TcpStream,
 ) -> std::io::Result<()> {
-    loop {
-        // TODO receive bytes
-        let buffer = write_rx.recv().unwrap();
+    let mut buffer = [0; 1024];
 
-        if buffer.is_empty() {
-            break;
+    loop {
+        let num_read = match to_stream.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(x) => x,
+            Err(_) => break,
+        };
+
+        if let Err(e) = from_stream.write_all(&buffer) {
+            if e.kind() == std::io::ErrorKind::BrokenPipe {
+                // Stop processing
+                return Ok(());
+            }
+
+            return Err(e);
+            // eprintln!("Error: {}", e.to_string());
+            // std::process::exit(1);
         }
+    }
+
+    Ok(())
+}
+
+pub fn read_loop(
+    mut from_stream: TcpStream,
+    mut to_stream: TcpStream,
+    stats_tx: Sender<usize>,
+) -> std::io::Result<()> {
+    let mut buffer = [0; 1024];
+
+    loop {
+        let num_read = match from_stream.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(x) => x,
+            Err(_) => break,
+        };
 
         if let Err(e) = to_stream.write_all(&buffer) {
             if e.kind() == std::io::ErrorKind::BrokenPipe {
@@ -100,33 +128,6 @@ pub fn write_loop(
             // std::process::exit(1);
         }
     }
-    Ok(())
-}
-
-pub fn read_loop(
-    mut from_stream: TcpStream,
-    mut _to_stream: TcpStream,
-    stats_tx: Sender<usize>,
-    write_tx: Sender<Vec<u8>>,
-) -> std::io::Result<()> {
-    let mut buffer = [0; 1024];
-
-    loop {
-        let num_read = match from_stream.read(&mut buffer) {
-            Ok(0) => break,
-            Ok(x) => x,
-            Err(_) => break,
-        };
-
-        let _ = stats_tx.send(num_read);
-
-        if write_tx.send(Vec::from(&buffer[..num_read])).is_err() {
-            break;
-        }
-    }
-
-    let _ = stats_tx.send(0);
-    let _ = write_tx.send(Vec::new());
 
     Ok(())
 }
