@@ -53,14 +53,14 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     let from_arc = Arc::new(from_stream);
     let to_arc = Arc::new(to_stream);
 
-    let from_tx = from_arc.try_clone().unwrap();
-    let to_tx = to_arc.try_clone().unwrap();
+     let (mut from_tx, mut from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
+     let (mut to_tx, mut to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
 
     let (stats_tx, _) = mpsc::channel();
     let (write_tx, write_rx) = mpsc::channel();
     let connections = vec![
-        thread::spawn(move || read_loop(from_tx, stats_tx, write_tx).unwrap()),
-        thread::spawn(move || write_loop(to_tx, write_rx).unwrap()),
+        thread::spawn(move || read_loop(from_tx, to_rx, stats_tx, write_tx).unwrap()),
+        thread::spawn(move || write_loop(to_tx, from_rx, write_rx).unwrap()),
     ];
 
 
@@ -76,7 +76,11 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     }
 }
 
-pub fn write_loop(mut to_stream: TcpStream, write_rx: Receiver<Vec<u8>>) -> std::io::Result<()> {
+pub fn write_loop(
+    mut to_stream: TcpStream,
+    mut _from_stream: TcpStream,
+    write_rx: Receiver<Vec<u8>>
+) -> std::io::Result<()> {
     loop {
         // TODO receive bytes
         let buffer = write_rx.recv().unwrap();
@@ -101,6 +105,7 @@ pub fn write_loop(mut to_stream: TcpStream, write_rx: Receiver<Vec<u8>>) -> std:
 
 pub fn read_loop(
     mut from_stream: TcpStream,
+    mut _to_stream: TcpStream,
     stats_tx: Sender<usize>,
     write_tx: Sender<Vec<u8>>,
 ) -> std::io::Result<()> {
