@@ -56,10 +56,11 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
      let (mut from_tx, mut from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
      let (mut to_tx, mut to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
 
-    let (stats_tx, _stats_rx) = mpsc::channel();
+    let (stats_input, _stats_rx) = mpsc::channel();
+    let (stats_output, _stats_rx) = mpsc::channel();
     let connections = vec![
-        thread::spawn(move || read_loop(from_tx, to_rx, stats_tx).unwrap()),
-        thread::spawn(move || write_loop(to_tx, from_rx).unwrap()),
+        thread::spawn(move || thread_loop(from_tx, to_rx, stats_input).unwrap()),
+        thread::spawn(move || thread_loop(to_tx, from_rx, stats_output).unwrap()),
     ];
 
 
@@ -75,45 +76,21 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     }
 }
 
-pub fn write_loop(
-    mut to_stream: TcpStream,
-    mut from_stream: TcpStream,
+pub fn thread_loop(
+    mut input: TcpStream,
+    mut output: TcpStream,
+    _stats_tx: Sender<usize>,
 ) -> std::io::Result<()> {
     let mut buffer = [0; 1024];
 
     loop {
-        let num_read = match to_stream.read(&mut buffer) {
+        let num_read = match input.read(&mut buffer) {
             Ok(0) => break,
             Ok(x) => x,
             Err(_) => break,
         };
 
-        if let Err(e) = from_stream.write_all(&buffer) {
-            if e.kind() == std::io::ErrorKind::BrokenPipe {
-                return Ok(());
-            }
-            return Err(e);
-        }
-    }
-
-    Ok(())
-}
-
-pub fn read_loop(
-    mut from_stream: TcpStream,
-    mut to_stream: TcpStream,
-    stats_tx: Sender<usize>,
-) -> std::io::Result<()> {
-    let mut buffer = [0; 1024];
-
-    loop {
-        let num_read = match from_stream.read(&mut buffer) {
-            Ok(0) => break,
-            Ok(x) => x,
-            Err(_) => break,
-        };
-
-        if let Err(e) = to_stream.write_all(&buffer) {
+        if let Err(e) = output.write_all(&buffer) {
             if e.kind() == std::io::ErrorKind::BrokenPipe {
                 return Ok(());
             }
