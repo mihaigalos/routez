@@ -5,11 +5,10 @@ use std::thread;
 use std::time::SystemTime;
 use std::sync::mpsc;
 use std::sync::mpsc::Sender;
-use std::sync::mpsc::Receiver;
 use std::io::Read;
 use std::io::Write;
 
-
+use crate::stats::stats_loop;
 
 pub fn route(from: &str, to: &str) -> std::io::Result<()> {
 
@@ -53,15 +52,18 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     let from_arc = Arc::new(from_stream);
     let to_arc = Arc::new(to_stream);
 
-     let (mut from_tx, mut from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
-     let (mut to_tx, mut to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
+     let (from_tx, from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
+     let (to_tx, to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
 
-    let (stats_input, _stats_rx) = mpsc::channel();
-    let (stats_output, _stats_rx) = mpsc::channel();
+    let (stats_input_blackhole, _) = mpsc::channel();
+    let (stats_input, stats_output) = mpsc::channel();
+    let (from_clone, to_clone) = (from.clone(), to.clone());
     let connections = vec![
-        thread::spawn(move || thread_loop(from_tx, to_rx, stats_input).unwrap()),
-        thread::spawn(move || thread_loop(to_tx, from_rx, stats_output).unwrap()),
+        thread::spawn(move || thread_loop(from_tx, to_rx, stats_input_blackhole).unwrap()),
+        thread::spawn(move || thread_loop(to_tx, from_rx, stats_input).unwrap()),
+        thread::spawn(move || stats_loop(false, stats_output, &from_clone, &to_clone).unwrap()),
     ];
+
 
 
     let (from_clone, to_clone) = (from.clone(), to.clone());
@@ -74,12 +76,13 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
         let timestamp = get_timestamp();
         println!("🔌 {timestamp} DISCONNECTED {from} -> {to}");
     }
+
 }
 
 pub fn thread_loop(
     mut input: TcpStream,
     mut output: TcpStream,
-    _stats_tx: Sender<usize>,
+    stats_input: Sender<usize>,
 ) -> std::io::Result<()> {
     let mut buffer = [0; 1024];
 
@@ -96,7 +99,9 @@ pub fn thread_loop(
             }
             return Err(e);
         }
+        let _ = stats_input.send(num_read);
     }
+    let _ = stats_input.send(0);
 
     Ok(())
 }
