@@ -1,9 +1,14 @@
-use std::io;
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 use std::thread;
 
 use std::time::SystemTime;
+use std::sync::mpsc;
+use std::sync::mpsc::Sender;
+use std::io::Read;
+use std::io::Write;
+
+use crate::stats::stats_loop;
 
 pub fn route(from: &str, to: &str) -> std::io::Result<()> {
 
@@ -47,13 +52,18 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     let from_arc = Arc::new(from_stream);
     let to_arc = Arc::new(to_stream);
 
-    let (mut from_tx, mut from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
-    let (mut to_tx, mut to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
+     let (from_tx, from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
+     let (to_tx, to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
 
+    let (stats_input_blackhole, _) = mpsc::channel();
+    let (stats_input, stats_output) = mpsc::channel();
+    let (from_clone, to_clone) = (from.clone(), to.clone());
     let connections = vec![
-        thread::spawn(move || io::copy(&mut from_tx, &mut to_rx).unwrap()),
-        thread::spawn(move || io::copy(&mut to_tx, &mut from_rx).unwrap()),
+        thread::spawn(move || thread_loop(from_tx, to_rx, stats_input_blackhole).unwrap()),
+        thread::spawn(move || thread_loop(to_tx, from_rx, stats_input).unwrap()),
+        thread::spawn(move || stats_loop(false, stats_output, &from_clone, &to_clone).unwrap()),
     ];
+
 
 
     let (from_clone, to_clone) = (from.clone(), to.clone());
@@ -61,9 +71,38 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
         let timestamp = get_timestamp();
         println!("💔 {timestamp} BROKEN_PIPE {from_clone} -> {to_clone}");
     }));
+
     for t in connections {
         t.join().unwrap();
-        let timestamp = get_timestamp();
-        println!("🔌 {timestamp} DISCONNECTED {from} -> {to}");
     }
+
+    let timestamp = get_timestamp();
+    println!("🔌 {timestamp} DISCONNECTED {from} -> {to}");
+}
+
+pub fn thread_loop(
+    mut input: TcpStream,
+    mut output: TcpStream,
+    stats_input: Sender<usize>,
+) -> std::io::Result<()> {
+    let mut buffer = [0; 1024];
+
+    loop {
+        let num_read = match input.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(x) => x,
+            Err(_) => break,
+        };
+
+        if let Err(e) = output.write_all(&buffer) {
+            if e.kind() == std::io::ErrorKind::BrokenPipe {
+                return Ok(());
+            }
+            return Err(e);
+        }
+        let _ = stats_input.send(num_read);
+    }
+    let _ = stats_input.send(0);
+
+    Ok(())
 }
