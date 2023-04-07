@@ -90,13 +90,9 @@ pub fn write_loop(
 
         if let Err(e) = from_stream.write_all(&buffer) {
             if e.kind() == std::io::ErrorKind::BrokenPipe {
-                // Stop processing
                 return Ok(());
             }
-
             return Err(e);
-            // eprintln!("Error: {}", e.to_string());
-            // std::process::exit(1);
         }
     }
 
@@ -119,13 +115,9 @@ pub fn read_loop(
 
         if let Err(e) = to_stream.write_all(&buffer) {
             if e.kind() == std::io::ErrorKind::BrokenPipe {
-                // Stop processing
                 return Ok(());
             }
-
             return Err(e);
-            // eprintln!("Error: {}", e.to_string());
-            // std::process::exit(1);
         }
     }
 
