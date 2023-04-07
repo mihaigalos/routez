@@ -1,4 +1,5 @@
 use std::sync::mpsc::Receiver;
+use std::io::Write;
 
 use crate::timer::Timer;
 
@@ -38,9 +39,22 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>, from: &str, to: &str)
 }
 
 fn output_progress(bytes: usize, elapsed: String, rate: f64, from: &str, to: &str) {
-    let stats = format!("{from} -> {to} Bytes: {bytes}, Elapsed: {elapsed}, Rate: {rate} b/s");
+    let stats = format!("🚀 Bytes: {bytes}, Elapsed: {elapsed}, Rate: {} MB/s {from} -> {to}", rate.as_human_readable());
     eprint!("{stats}");
     eprint!("{}","\u{8}".repeat(stats.len()));
+    let _ = std::io::stderr().flush();
+}
+
+pub trait BytesOutput {
+    fn as_human_readable(&self) -> String;
+}
+
+impl BytesOutput for f64 {
+    fn as_human_readable(&self) -> String {
+        let megabytes = *self / (1024.*1024.);       
+
+        format!("{megabytes}")
+    }
 }
 
 pub trait TimeOutput {
