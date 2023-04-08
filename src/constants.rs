@@ -1,4 +1,4 @@
-pub const STATS_TIMER_RESOLUTION_MS: u64 = 1024*1024;
+pub const STATS_TIMER_RESOLUTION_MS: u64 = 100;
 pub const BUFFER_SIZE: usize = 4096;
 
 pub const KILO: (f64, &str) = (1024., "KB");

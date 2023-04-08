@@ -95,9 +95,9 @@ pub fn thread_loop(
             Err(_) => break,
         };
 
-        let shadow = buffer[..num_read].to_vec();
+        let shadow = &buffer[..num_read];
 
-        if let Err(e) = output.write_all(&shadow) {
+        if let Err(e) = output.write_all(shadow) {
             if e.kind() == std::io::ErrorKind::BrokenPipe {
                 return Ok(());
             }
