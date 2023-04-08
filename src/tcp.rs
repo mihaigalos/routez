@@ -2,6 +2,7 @@ use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 use std::thread;
 
+use std::time::Duration;
 use std::time::SystemTime;
 use std::sync::mpsc;
 use std::sync::mpsc::Sender;
@@ -87,6 +88,7 @@ pub fn thread_loop(
     stats_input: Sender<usize>,
 ) -> std::io::Result<()> {
     let mut buffer = [0; BUFFER_SIZE];
+    input.set_read_timeout(Some(Duration::from_millis(CONNECTION_TIMEOUT_MS))).unwrap();
 
     loop {
         let num_read = match input.read(&mut buffer) {
