@@ -1,22 +1,24 @@
 use std::time::{Duration, Instant};
 
 pub struct Timer {
-    pub last_instant: Instant,
-    pub delta: Duration,
-    pub period: Duration,
     pub countdown: Duration,
+    pub delta: Duration,
+    pub last_instant: Instant,
+    pub period: Duration,
     pub ready: bool,
+    pub start: Instant,
 }
 
 impl Timer {
-    pub fn new() -> Self {
+    pub fn new(resolution_ms: u64) -> Self {
         let now = Instant::now();
         Self {
-            last_instant: now,
-            delta: Duration::default(),
-            period: Duration::from_millis(1000),
             countdown: Duration::default(),
+            delta: Duration::default(),
+            last_instant: now,
+            period: Duration::from_millis(resolution_ms),
             ready: true,
+            start: Instant::now(),
         }
     }
 
