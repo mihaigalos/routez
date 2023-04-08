@@ -17,7 +17,7 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>, from: &str, to: &str)
         if !silent && timer.ready {
             timer.ready = false;
             let timestamp = timer.start.elapsed().as_secs_f64();
-            let elapsed = timer.start.elapsed().as_secs().to_string();
+            let elapsed = timer.start.elapsed().as_secs().to_string()+"s";
             let rate_per_second = total_bytes as f64 / timestamp;
             output_progress(
                 total_bytes,
@@ -34,17 +34,18 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>, from: &str, to: &str)
     }
 
     if !silent {
-        eprintln!();
+        println!();
     }
 
     Ok(())
 }
 
 fn output_progress(bytes: usize, elapsed: String, rate: f64, from: &str, to: &str) {
-    let stats = format!("🚀 {elapsed}s TRANSFERRING {from} -> {to} {} {} ", bytes.as_human_readable(""), rate.as_human_readable("/s"));
-    eprint!("{stats}");
-    eprint!("{}","\u{8}".repeat(stats.len()));
-    let _ = std::io::stderr().flush();
+    let stats = format!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>10}","🚀", elapsed, "TRANSFERRING",from,"⏩",to, bytes.as_human_readable(""), rate.as_human_readable("/s"));
+    //let stats = format!("🚀 {elapsed:>19}s TRANSFERRING {from} -> {to} {} {} ", bytes.as_human_readable(""), rate.as_human_readable("/s"));
+    print!("{stats}");
+    print!("{}","\u{8}".repeat(stats.len()));
+    let _ = std::io::stdout().flush();
 }
 
 pub trait BytesOutput {

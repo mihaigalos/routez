@@ -29,7 +29,7 @@ pub fn route(from: &str, to: &str) -> std::io::Result<()> {
 
         let timestamp = get_timestamp();
         match connection_thread {
-            Ok(_) => { println!("⚡ {timestamp} CONNECTED {from} -> {to} - -"); }
+            Ok(_) => { println!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>10}","⚡", timestamp, "CONNECTED",from,"⏩",to,"-","-"); }
             Err(err) => { println!("Destination error: {err}"); }
         }
     }
@@ -69,7 +69,7 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     let (from_clone, to_clone) = (from.clone(), to.clone());
     std::panic::set_hook(Box::new( move |_| {
         let timestamp = get_timestamp();
-        println!("💔 {timestamp} BROKEN_PIPE {from_clone} -> {to_clone} - -");
+        println!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>10}","💔", timestamp, "BROKEN_PIPE",from_clone,"⏩",to_clone,"-","-");
     }));
 
     for t in connections {
@@ -77,7 +77,7 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     }
 
     let timestamp = get_timestamp();
-    println!("🔌 {timestamp} DISCONNECTED {from} -> {to} - -");
+    println!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>10}","🔌", timestamp, "DISCONNECTED",from,"⏩",to,"-","-");
 }
 
 pub fn thread_loop(
