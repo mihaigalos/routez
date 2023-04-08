@@ -1,3 +1,3 @@
 [default]
-regex="(.*?) (.*?) (.*?) (.*?) -> (.*)"
-colors="blue cyan white green bred"
+regex="(.*?) (.*?) (.*?) (.*?) -> (.*?) (.*?) (.*)"
+colors="blue cyan white green bred white cyan"

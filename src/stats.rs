@@ -17,11 +17,11 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>, from: &str, to: &str)
         if !silent && timer.ready {
             timer.ready = false;
             let timestamp = timer.start.elapsed().as_secs_f64();
+            let elapsed = timer.start.elapsed().as_secs().to_string();
             let rate_per_second = total_bytes as f64 / timestamp;
-            //println!("bytes: {total_bytes}, timestamp: {}, rate: {:.7}", timestamp, rate_per_second.as_human_readable());
             output_progress(
                 total_bytes,
-                timestamp.to_string(),
+                elapsed,
                 rate_per_second,
                 from,
                 to
@@ -41,28 +41,40 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>, from: &str, to: &str)
 }
 
 fn output_progress(bytes: usize, elapsed: String, rate: f64, from: &str, to: &str) {
-    let stats = format!("🚀 Bytes: {bytes}, Elapsed: {elapsed}, Rate: {} {from} -> {to}", rate.as_human_readable());
+    let stats = format!("🚀 {elapsed}s TRANSFERRING {from} -> {to} {} {} ", bytes.as_human_readable(""), rate.as_human_readable("/s"));
     eprint!("{stats}");
     eprint!("{}","\u{8}".repeat(stats.len()));
     let _ = std::io::stderr().flush();
 }
 
 pub trait BytesOutput {
-    fn as_human_readable(&self) -> String;
+    fn as_human_readable(&self, suffix: &str) -> String;
 }
 
 impl BytesOutput for f64 {
-    fn as_human_readable(&self) -> String {
+    fn as_human_readable(&self, suffix: &str) -> String {
         let (unit, description) = if *self >= KILO.0 && *self < MEGA.0 {
             KILO
         } else if *self >= MEGA.0 && *self < GIGA.0 {
             MEGA
-        } else {
+        } else if *self >= GIGA.0 && *self < TERRA.0 {
             GIGA
+        } else if *self >= TERRA.0 && *self < PETA.0 {
+            TERRA
+        } else if *self >= PETA.0 && *self < EXA.0 {
+            PETA
+        } else {
+            EXA
         };
         let result = *self / unit;
 
-        format!("{result:.3} {description}/s")
+        format!("{result:.3}{description}{suffix}")
+    }
+}
+
+impl BytesOutput for usize {
+    fn as_human_readable(&self, suffix: &str) -> String {
+        (*self as f64).as_human_readable(suffix)
     }
 }
 
