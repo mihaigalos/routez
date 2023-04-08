@@ -8,6 +8,7 @@ use std::sync::mpsc::Sender;
 use std::io::Read;
 use std::io::Write;
 
+use crate::constants::*;
 use crate::stats::stats_loop;
 
 pub fn route(from: &str, to: &str) -> std::io::Result<()> {
@@ -85,7 +86,7 @@ pub fn thread_loop(
     mut output: TcpStream,
     stats_input: Sender<usize>,
 ) -> std::io::Result<()> {
-    let mut buffer = [0; 1024];
+    let mut buffer = [0; BUFFER_SIZE];
 
     loop {
         let num_read = match input.read(&mut buffer) {
