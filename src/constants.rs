@@ -1,5 +1,4 @@
 pub const BUFFER_SIZE: usize = 4096;
-pub const CONNECTION_TIMEOUT_MS: u64 = 500; // TODO: set this from the commandline to hold i.e. SSH open indefinetely (also when there is no traffic)
 pub const STATS_TIMER_RESOLUTION_MS: u64 = 100;
 
 pub const KILO: (f64, &str) = (1024., "KB");

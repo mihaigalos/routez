@@ -1,8 +1,7 @@
-use std::net::{TcpListener, TcpStream};
+use std::net::{Shutdown, TcpListener, TcpStream};
 use std::sync::Arc;
 use std::thread;
 
-use std::time::Duration;
 use std::time::SystemTime;
 use std::sync::mpsc;
 use std::sync::mpsc::Sender;
@@ -88,11 +87,13 @@ pub fn thread_loop(
     stats_input: Sender<usize>,
 ) -> std::io::Result<()> {
     let mut buffer = [0; BUFFER_SIZE];
-    input.set_read_timeout(Some(Duration::from_millis(CONNECTION_TIMEOUT_MS))).unwrap();
 
     loop {
         let num_read = match input.read(&mut buffer) {
-            Ok(0) => break,
+            Ok(0) => {
+                output.shutdown(Shutdown::Both).expect("Cannot shutdown output stream");
+                break
+            },
             Ok(x) => x,
             Err(_) => break,
         };
@@ -107,7 +108,7 @@ pub fn thread_loop(
         }
         let _ = stats_input.send(num_read);
     }
-    let _ = stats_input.send(0);
 
+    let _ = stats_input.send(0);
     Ok(())
 }
