@@ -54,19 +54,22 @@ pub trait BytesOutput {
 
 impl BytesOutput for f64 {
     fn as_human_readable(&self, suffix: &str) -> String {
-        let (unit, description) = if *self >= KILO.0 && *self < MEGA.0 {
-            KILO
-        } else if *self >= MEGA.0 && *self < GIGA.0 {
-            MEGA
-        } else if *self >= GIGA.0 && *self < TERRA.0 {
-            GIGA
-        } else if *self >= TERRA.0 && *self < PETA.0 {
-            TERRA
+        let (unit, description) = if *self > EXA.0 {
+            EXA
         } else if *self >= PETA.0 && *self < EXA.0 {
             PETA
+        } else if *self >= TERRA.0 && *self < PETA.0 {
+            TERRA
+        } else if *self >= GIGA.0 && *self < TERRA.0 {
+            GIGA
+        } else if *self >= MEGA.0 && *self < GIGA.0 {
+            MEGA
+        } else if *self >= KILO.0 && *self < MEGA.0 {
+            KILO
         } else {
-            EXA
+            BYTE
         };
+
         let result = *self / unit;
 
         format!("{result:.3}{description}{suffix}")
