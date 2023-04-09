@@ -41,7 +41,7 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>, from: &str, to: &str)
 }
 
 fn output_progress(bytes: usize, elapsed: String, rate: f64, from: &str, to: &str) {
-    let stats = format!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>10}","🚀", elapsed, "TRANSFERRING",from,"⏩",to, bytes.as_human_readable(""), rate.as_human_readable("/s"));
+    let stats = format!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>11}","🚀", elapsed, "TRANSFERRING",from,"⏩",to, bytes.as_human_readable(""), rate.as_human_readable("/s"));
     //let stats = format!("🚀 {elapsed:>19}s TRANSFERRING {from} -> {to} {} {} ", bytes.as_human_readable(""), rate.as_human_readable("/s"));
     print!("{stats}");
     print!("{}","\u{8}".repeat(stats.len()));
