@@ -3,8 +3,8 @@ use std::time::SystemTime;
 
 use crate::constants::*;
 
-pub fn print_start(from: &str, to: &str) {
-    println!("Routing TCP {from} ⏩ {to}");
+pub fn print_start(from: &str, to: &str, protocol: &str) {
+    println!("Routing {protocol} {from} ⏩ {to}");
 }
 
 pub fn print_connected(from: &str, to: &str) {

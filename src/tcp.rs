@@ -15,7 +15,7 @@ pub fn route(from: &str, to: &str) -> std::io::Result<()> {
 
     let listener = TcpListener::bind(from).expect("Cannot bind from address");
 
-    print_start(from, to);
+    print_start(from, to, "TCP");
     for incoming_stream in listener.incoming() {
         let from_stream = if let Ok(val) = incoming_stream {
             val

@@ -3,9 +3,10 @@ use std::sync::Arc;
 use std::thread;
 
 use crate::constants::*;
+use crate::output::print_start;
 
 pub fn route(from: &str, to: &str) -> std::io::Result<()> {
-    println!("Routing UDP {from} ⏩ {to}");
+    print_start(from, to, "UDP");
     let socket = UdpSocket::bind(from)?;
 
     loop {
