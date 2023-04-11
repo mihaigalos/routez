@@ -2,6 +2,8 @@ use std::sync::mpsc::Receiver;
 
 use crate::timer::Timer;
 use crate::output::*;
+use crate::constants::STATS_TIMER_RESOLUTION_MS;
+
 
 pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>, from: &str, to: &str) -> std::io::Result<()> {
     let mut total_bytes = 0;

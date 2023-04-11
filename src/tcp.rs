@@ -2,7 +2,6 @@ use std::net::{Shutdown, TcpListener, TcpStream};
 use std::sync::Arc;
 use std::thread;
 
-use std::time::SystemTime;
 use std::sync::mpsc;
 use std::sync::mpsc::Sender;
 use std::io::Read;
@@ -10,13 +9,13 @@ use std::io::Write;
 
 use crate::constants::*;
 use crate::stats::stats_loop;
+use crate::output::*;
 
 pub fn route(from: &str, to: &str) -> std::io::Result<()> {
 
     let listener = TcpListener::bind(from).expect("Cannot bind from address");
 
-    println!("Routing TCP {from} ⏩ {to}");
-
+    print_start(from, to);
     for incoming_stream in listener.incoming() {
         let from_stream = if let Ok(val) = incoming_stream {
             val
@@ -28,25 +27,13 @@ pub fn route(from: &str, to: &str) -> std::io::Result<()> {
         let connection_thread = TcpStream::connect(to)
             .map(|to_stream| thread::spawn(move || connection_handler(from_clone, to_clone, from_stream, to_stream)));
 
-        let timestamp = get_timestamp();
         match connection_thread {
-            Ok(_) => { println!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>11}","⚡", timestamp, "CONNECTED",from,"⏩",to,"-","-"); }
+            Ok(_) => print_connected(from, to),
             Err(err) => { println!("Destination error: {err}"); }
         }
     }
 
     Ok(())
-}
-
-fn get_timestamp() -> String {
-    let now = SystemTime::now();
-    let now_str = format!("{:?}",now);
-    let now_str_digits_spaces: String = now_str.chars().filter(|c| c.is_ascii_digit() || *c == ',').collect();
-    let now_splitted: Vec<&str> = now_str_digits_spaces.split(',').collect();
-    let tv_sec:usize =  now_splitted[0].parse().unwrap();
-    let tv_nsec:usize = now_splitted[1].parse().unwrap();
-
-    tv_sec.to_string() + "." + &tv_nsec.to_string()
 }
 
 fn connection_handler(from: String, to: String, from_stream: TcpStream, to_stream: TcpStream) {
@@ -65,20 +52,14 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
         thread::spawn(move || stats_loop(false, stats_output, &from_clone, &to_clone).unwrap()),
     ];
 
-
-
     let (from_clone, to_clone) = (from.clone(), to.clone());
-    std::panic::set_hook(Box::new( move |_| {
-        let timestamp = get_timestamp();
-        println!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>11}","💔", timestamp, "BROKEN_PIPE",from_clone,"⏩",to_clone,"-","-");
-    }));
+    std::panic::set_hook(Box::new( move |_| { print_broken_pipe(&from_clone, &to_clone) }));
 
     for t in connections {
         t.join().unwrap();
     }
 
-    let timestamp = get_timestamp();
-    println!("{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>11}","🔌", timestamp, "DISCONNECTED",from,"⏩",to,"-","-");
+    print_disconnected(&from, &to);
 }
 
 pub fn thread_loop(
