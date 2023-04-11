@@ -5,12 +5,12 @@ use crate::output::*;
 use crate::constants::STATS_TIMER_RESOLUTION_MS;
 
 
-pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>, from: &str, to: &str) -> std::io::Result<()> {
+pub fn stats_loop(silent: bool, stats_output: Receiver<usize>, from: &str, to: &str) -> std::io::Result<()> {
     let mut total_bytes = 0;
     let mut timer = Timer::new(STATS_TIMER_RESOLUTION_MS);
 
     loop {
-        let num_bytes = stats_rx.recv().unwrap();
+        let num_bytes = stats_output.recv().unwrap();
         timer.update();
 
         total_bytes += num_bytes;
