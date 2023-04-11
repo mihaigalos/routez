@@ -2,17 +2,16 @@ use std::net::{Shutdown, TcpListener, TcpStream};
 use std::sync::Arc;
 use std::thread;
 
-use std::sync::mpsc;
-use std::sync::mpsc::Sender;
 use std::io::Read;
 use std::io::Write;
+use std::sync::mpsc;
+use std::sync::mpsc::Sender;
 
 use crate::constants::*;
-use crate::stats::stats_loop;
 use crate::output::*;
+use crate::stats::stats_loop;
 
 pub fn route(from: &str, to: &str) -> std::io::Result<()> {
-
     let listener = TcpListener::bind(from).expect("Cannot bind from address");
 
     print_start(from, to, "TCP");
@@ -20,16 +19,19 @@ pub fn route(from: &str, to: &str) -> std::io::Result<()> {
         let from_stream = if let Ok(val) = incoming_stream {
             val
         } else {
-            continue
+            continue;
         };
 
         let (from_clone, to_clone) = (String::from(from), String::from(to));
-        let connection_thread = TcpStream::connect(to)
-            .map(|to_stream| thread::spawn(move || connection_handler(from_clone, to_clone, from_stream, to_stream)));
+        let connection_thread = TcpStream::connect(to).map(|to_stream| {
+            thread::spawn(move || connection_handler(from_clone, to_clone, from_stream, to_stream))
+        });
 
         match connection_thread {
             Ok(_) => print_connected(from, to),
-            Err(err) => { println!("Destination error: {err}"); }
+            Err(err) => {
+                println!("Destination error: {err}");
+            }
         }
     }
 
@@ -40,8 +42,8 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     let from_arc = Arc::new(from_stream);
     let to_arc = Arc::new(to_stream);
 
-     let (from_tx, from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
-     let (to_tx, to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
+    let (from_tx, from_rx) = (from_arc.try_clone().unwrap(), from_arc.try_clone().unwrap());
+    let (to_tx, to_rx) = (to_arc.try_clone().unwrap(), to_arc.try_clone().unwrap());
 
     let (stats_input_blackhole, _) = mpsc::channel();
     let (stats_input, stats_output) = mpsc::channel();
@@ -53,7 +55,7 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
     ];
 
     let (from_clone, to_clone) = (from.clone(), to.clone());
-    std::panic::set_hook(Box::new( move |_| { print_broken_pipe(&from_clone, &to_clone) }));
+    std::panic::set_hook(Box::new(move |_| print_broken_pipe(&from_clone, &to_clone)));
 
     for t in connections {
         t.join().unwrap();
@@ -72,9 +74,11 @@ pub fn thread_loop(
     loop {
         let num_read = match input.read(&mut buffer) {
             Ok(0) => {
-                output.shutdown(Shutdown::Both).expect("Cannot shutdown output stream");
-                break
-            },
+                output
+                    .shutdown(Shutdown::Both)
+                    .expect("Cannot shutdown output stream");
+                break;
+            }
             Ok(x) => x,
             Err(_) => break,
         };

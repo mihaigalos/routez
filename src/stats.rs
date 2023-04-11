@@ -1,11 +1,15 @@
 use std::sync::mpsc::Receiver;
 
-use crate::timer::Timer;
-use crate::output::*;
 use crate::constants::STATS_TIMER_RESOLUTION_MS;
+use crate::output::*;
+use crate::timer::Timer;
 
-
-pub fn stats_loop(silent: bool, stats_output: Receiver<usize>, from: &str, to: &str) -> std::io::Result<()> {
+pub fn stats_loop(
+    silent: bool,
+    stats_output: Receiver<usize>,
+    from: &str,
+    to: &str,
+) -> std::io::Result<()> {
     let mut total_bytes = 0;
     let mut timer = Timer::new(STATS_TIMER_RESOLUTION_MS);
 
@@ -18,15 +22,9 @@ pub fn stats_loop(silent: bool, stats_output: Receiver<usize>, from: &str, to: &
         if !silent && timer.ready {
             timer.ready = false;
             let timestamp = timer.start.elapsed().as_secs_f64();
-            let elapsed = timer.start.elapsed().as_secs().to_string()+"s";
+            let elapsed = timer.start.elapsed().as_secs().to_string() + "s";
             let rate_per_second = total_bytes as f64 / timestamp;
-            output_progress(
-                total_bytes,
-                elapsed,
-                rate_per_second,
-                from,
-                to
-            );
+            output_progress(total_bytes, elapsed, rate_per_second, from, to);
         }
 
         if num_bytes == 0 {
@@ -40,4 +38,3 @@ pub fn stats_loop(silent: bool, stats_output: Receiver<usize>, from: &str, to: &
 
     Ok(())
 }
-
