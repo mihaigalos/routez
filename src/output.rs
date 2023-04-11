@@ -23,11 +23,11 @@ pub fn print_broken_pipe(from: &str, to: &str) {
     );
 }
 
-pub fn print_disconnected(from: &str, to: &str) {
+pub fn print_disconnected(from: &str, to: &str, bytes_total: usize, rate: f64) {
     let timestamp = get_timestamp();
     println!(
         "{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>11}",
-        "🔌", timestamp, "DISCONNECTED", from, "⏩", to, "-", "-"
+        "🔌", timestamp, "DISCONNECTED", from, "⏩", to, bytes_total.as_human_readable(""), rate.as_human_readable("/s")
     );
 }
 
@@ -45,7 +45,7 @@ fn get_timestamp() -> String {
     tv_sec.to_string() + "." + &tv_nsec.to_string()
 }
 
-pub fn output_progress(bytes: usize, elapsed: String, rate: f64, from: &str, to: &str) {
+pub fn construct_output(bytes: usize, elapsed: String, rate: f64, from: &str, to: &str) -> String {
     let stats = format!(
         "{} {:>20}{:>14}{:>21} {} {:>21} {:>10} {:>11}",
         "🚀",
@@ -56,7 +56,12 @@ pub fn output_progress(bytes: usize, elapsed: String, rate: f64, from: &str, to:
         to,
         bytes.as_human_readable(""),
         rate.as_human_readable("/s")
-    );
+    ).to_string();
+
+    stats
+}
+pub fn output_progress(bytes: usize, elapsed: String, rate: f64, from: &str, to: &str) {
+    let stats = construct_output(bytes, elapsed, rate, from, to);
     eprint!("{stats}");
     eprint!("{}", "\u{8}".repeat(stats.len()));
     let _ = std::io::stderr().flush();

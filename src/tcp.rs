@@ -47,11 +47,12 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
 
     let (stats_input_blackhole, _) = mpsc::channel();
     let (stats_input, stats_output) = mpsc::channel();
+    let (stats_final_tx, stats_final_rx) = mpsc::channel();
     let (from_clone, to_clone) = (from.clone(), to.clone());
     let connections = vec![
         thread::spawn(move || thread_loop(from_tx, to_rx, stats_input_blackhole).unwrap()),
         thread::spawn(move || thread_loop(to_tx, from_rx, stats_input).unwrap()),
-        thread::spawn(move || stats_loop(false, stats_output, &from_clone, &to_clone).unwrap()),
+        thread::spawn(move || stats_loop(false, stats_output, stats_final_tx, &from_clone, &to_clone).unwrap()),
     ];
 
     let (from_clone, to_clone) = (from.clone(), to.clone());
@@ -61,7 +62,8 @@ fn connection_handler(from: String, to: String, from_stream: TcpStream, to_strea
         t.join().unwrap();
     }
 
-    print_disconnected(&from, &to);
+    let stats_final = stats_final_rx.recv().unwrap();
+    print_disconnected(&from, &to, stats_final.0, stats_final.1);
 }
 
 pub fn thread_loop(
