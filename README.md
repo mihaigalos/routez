@@ -31,6 +31,14 @@ Now run with:
 routez routez.config
 ```
 
+## Docker
+
+If you prefer running a Docker image instead of the barebones binary:
+
+```bash
+sudo docker run --rm -it --net=host mihaigalos/routez:latest 127.0.0.1:1234 127.0.0.1:8080 TCP
+```
+
 ## Pipeview
 
 To output color logs, have a look at [pipeview](https://github.com/mihaigalos/pipeview).
